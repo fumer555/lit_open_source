@@ -1,16 +1,26 @@
-from PyPDF2 import PdfReader, PdfWriter
+import fitz  # PyMuPDF
 
 def extract_pages_with_annotations(input_path, output_path, page_numbers):
-    reader = PdfReader(input_path)
-    writer = PdfWriter()
+    # Open the input PDF
+    input_pdf = fitz.open(input_path)
     
+    # Create a new PDF for output
+    output_pdf = fitz.open()
+    
+    # Convert 1-based page numbers to 0-based and handle negative indices
     for page_num in page_numbers:
-        # Page numbers are 0-based in PyPDF2
-        if 0 <= page_num - 1 < len(reader.pages):
-            writer.add_page(reader.pages[page_num - 1])
+        # Adjust for 0-based indexing and check bounds
+        adjusted_num = page_num - 1
+        if 0 <= adjusted_num < len(input_pdf):
+            # Insert the page into the output PDF
+            output_pdf.insert_pdf(input_pdf, from_page=adjusted_num, to_page=adjusted_num)
     
-    with open(output_path, "wb") as output_pdf:
-        writer.write(output_pdf)
+    # Save the output PDF
+    output_pdf.save(output_path)
+    output_pdf.close()
+    input_pdf.close()
 
-# Usage
-extract_pages_with_annotations("jl.pdf", "output.pdf", [1, 3, 5])  # extracts pages 1, 3, 5
+# Usage (same as before)
+# extract_pages_with_annotations("jl.pdf", "output.pdf", [i for i in range(68,80)])
+
+extract_pages_with_annotations("jl.pdf", "output.pdf", [i for i in range(68,80)])  # 54-67 68-80
